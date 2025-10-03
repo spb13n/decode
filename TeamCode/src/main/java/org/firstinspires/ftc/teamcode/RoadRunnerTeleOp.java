@@ -26,8 +26,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -37,6 +38,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
+
 /*
  * This OpMode illustrates how to program your robot to drive field relative.  This means
  * that the robot drives the direction you push the joystick regardless of the current orientation
@@ -61,6 +65,8 @@ public class RoadRunnerTeleOp extends OpMode {
 
     // This declares the IMU needed to get the current direction the robot is facing
     IMU imu;
+    GoBildaPinpointDriver odo; // Declare OpMode member for the Odometry Computer
+
 
     @Override
     public void init() {
@@ -81,7 +87,13 @@ public class RoadRunnerTeleOp extends OpMode {
         backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        imu = hardwareMap.get(IMU.class, "imu");
+//        imu = hardwareMap.get(IMU.class, "imu");
+        odo = hardwareMap.get(GoBildaPinpointDriver.class,"pinpoint");
+        odo.setOffsets(-84.0, -168.0, DistanceUnit.MM); //these are tuned for 3110-0002-0001 Product Insight #1
+        odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        odo.recalibrateIMU();
+
         // This needs to be changed to match the orientation on your robot
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection =
                 RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD;
@@ -90,7 +102,7 @@ public class RoadRunnerTeleOp extends OpMode {
 
         RevHubOrientationOnRobot orientationOnRobot = new
                 RevHubOrientationOnRobot(logoDirection, usbDirection);
-        imu.initialize(new IMU.Parameters(orientationOnRobot));
+//        imu.initialize(new IMU.Parameters(orientationOnRobot));
     }
 
     @Override
@@ -103,32 +115,50 @@ public class RoadRunnerTeleOp extends OpMode {
         // If you press the A button, then you reset the Yaw to be zero from the way
         // the robot is currently pointing
         if (gamepad1.a) {
-            imu.resetYaw();
+//            imu.resetYaw();
+            odo.resetPosAndIMU();
         }
         // If you press the left bumper, you get a drive from the point of view of the robot
         // (much like driving an RC vehicle)
         if (gamepad1.left_bumper) {
             drive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
         } else {
-            driveFieldRelative(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+            driveFieldRelative(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, odo);
         }
     }
 
     // This routine drives the robot field relative
-    private void driveFieldRelative(double forward, double right, double rotate) {
-        // First, convert direction being asked to drive to polar coordinates
+//    private void driveFieldRelative(double forward, double right, double rotate) {
+//        // First, convert direction being asked to drive to polar coordinates
+//        double theta = Math.atan2(forward, right);
+//        double r = Math.hypot(right, forward);
+//
+//        // Second, rotate angle by the angle the robot is pointing
+//        theta = AngleUnit.normalizeRadians(theta -
+//                imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+//
+//        // Third, convert back to cartesian
+//        double newForward = r * Math.sin(theta);
+//        double newRight = r * Math.cos(theta);
+//
+//        // Finally, call the drive method with robot relative forward and right amounts
+//        drive(newForward, newRight, rotate);
+//    }
+
+    private void driveFieldRelative(double forward, double right, double rotate, GoBildaPinpointDriver driver) {
+        // Convert joystick input to polar coordinates
         double theta = Math.atan2(forward, right);
         double r = Math.hypot(right, forward);
 
-        // Second, rotate angle by the angle the robot is pointing
-        theta = AngleUnit.normalizeRadians(theta -
-                imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        // Rotate by robot's heading from Pinpoint
+        double heading = driver.getHeading(UnnormalizedAngleUnit.RADIANS);
+        theta = AngleUnit.normalizeRadians(theta - heading);
 
-        // Third, convert back to cartesian
+        // Convert back to robot-relative Cartesian coordinates
         double newForward = r * Math.sin(theta);
         double newRight = r * Math.cos(theta);
 
-        // Finally, call the drive method with robot relative forward and right amounts
+        // Drive using robot-relative inputs
         drive(newForward, newRight, rotate);
     }
 
