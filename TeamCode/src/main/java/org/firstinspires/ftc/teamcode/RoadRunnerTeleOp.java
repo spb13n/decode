@@ -121,8 +121,10 @@ public class RoadRunnerTeleOp extends OpMode {
         // If you press the left bumper, you get a drive from the point of view of the robot
         // (much like driving an RC vehicle)
         if (gamepad1.left_bumper) {
+            telemetry.addLine("Left Bumper pressed");
             drive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
         } else {
+            telemetry.addLine("Left Bumper NOT pressed");
             driveFieldRelative(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, odo);
         }
     }
@@ -152,6 +154,7 @@ public class RoadRunnerTeleOp extends OpMode {
 
         // Rotate by robot's heading from Pinpoint
         double heading = driver.getHeading(UnnormalizedAngleUnit.RADIANS);
+        telemetry.addData("heading", heading);
         theta = AngleUnit.normalizeRadians(theta - heading);
 
         // Convert back to robot-relative Cartesian coordinates
