@@ -55,7 +55,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  *
  */
-@TeleOp(name = "Robot: Field Relative Mecanum Drive", group = "Robot")
+@TeleOp(name = "RoadRunnerTeleOp", group = "Robot")
 public class RoadRunnerTeleOp extends OpMode {
     // This declares the four motors needed
     DcMotor frontLeftDrive;
@@ -116,8 +116,15 @@ public class RoadRunnerTeleOp extends OpMode {
         // the robot is currently pointing
         if (gamepad1.a) {
 //            imu.resetYaw();
-            odo.resetPosAndIMU();
+             odo.getYawScalar();
         }
+
+        telemetry.addData("Status", "Initialized");
+        telemetry.addData("X offset", odo.getXOffset(DistanceUnit.MM));
+        telemetry.addData("Y offset", odo.getYOffset(DistanceUnit.MM));
+        telemetry.addData("Device Version Number:", odo.getDeviceVersion());
+        telemetry.addData("Heading Scalar", odo.getYawScalar());
+        telemetry.update();
         // If you press the left bumper, you get a drive from the point of view of the robot
         // (much like driving an RC vehicle)
         if (gamepad1.left_bumper) {
