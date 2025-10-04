@@ -38,6 +38,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 
 /*
  * This OpMode illustrates how to program your robot to drive field relative.  This means
@@ -104,10 +105,7 @@ public class RoadRunnerTeleOp extends OpMode {
 
     @Override
     public void loop() {
-        telemetry.addLine("Press A to reset Yaw");
-        telemetry.addLine("Hold left bumper to drive in robot relative");
-        telemetry.addLine("The left joystick sets the robot direction");
-        telemetry.addLine("Moving the right joystick left and right turns the robot");
+
 
         // If you press the A button, then you reset the Yaw to be zero from the way
         // the robot is currently pointing
@@ -131,8 +129,8 @@ public class RoadRunnerTeleOp extends OpMode {
         double r = Math.hypot(right, forward);
 
         // Second, rotate angle by the angle the robot is pointing
-        theta = AngleUnit.normalizeRadians(theta -
-                imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        double heading = odo.getHeading(UnnormalizedAngleUnit.RADIANS);
+        theta = AngleUnit.normalizeRadians(theta - heading);
 
         // Third, convert back to cartesian
         double newForward = r * Math.sin(theta);
