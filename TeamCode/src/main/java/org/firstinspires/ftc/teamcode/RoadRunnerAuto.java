@@ -61,8 +61,8 @@ public class RoadRunnerAuto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
 
-    static final double     FORWARD_SPEED = 0.3;
-    static final double     TURN_SPEED    = 0.2;
+    static final double     FORWARD_SPEED = 0.5;
+    static final double     TURN_SPEED    = 0.5;
 
     @Override
     public void runOpMode() {
@@ -118,7 +118,7 @@ public class RoadRunnerAuto extends LinearOpMode {
         backLeftDrive.setPower(TURN_SPEED);
         backRightDrive.setPower(TURN_SPEED);
         runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 1.3)) {
+        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
             telemetry.addData("Path", "Leg 2: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
         }
