@@ -114,8 +114,8 @@ public class RoadRunnerAuto extends LinearOpMode {
 //        leftDrive.setPower(TURN_SPEED);
 //        rightDrive.setPower(-TURN_SPEED);
         frontLeftDrive.setPower(-TURN_SPEED);
-        frontRightDrive.setPower(TURN_SPEED);
-        backLeftDrive.setPower(TURN_SPEED);
+//        frontRightDrive.setPower(TURN_SPEED);
+//        backLeftDrive.setPower(TURN_SPEED);
         backRightDrive.setPower(-TURN_SPEED);
         runtime.reset();
         while (opModeIsActive() && (runtime.seconds() < 1.0)) {
